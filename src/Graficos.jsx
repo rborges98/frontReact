@@ -45,7 +45,7 @@ function Graficos() {
         type: 'spline'
       },
       title: {
-      text: 'Cotação Real/'
+      text: 'Cotação Real'
       },
       
       xAxis: [
