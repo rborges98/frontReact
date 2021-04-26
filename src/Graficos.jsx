@@ -13,13 +13,13 @@ function Graficos() {
     useEffect(()=>{  //função utilizada para renderizar o componente
       const getData = async () => {
         const apiData = await Promise.all([
-          api.get('/api/2021/04/24'),   //pegando os endpoints da api para renderizar o json
-          api.get('/api/2021/04/23'),
-          api.get('/api/2021/04/22'),
+          api.get('/api/2021/04/20'),   //pegando os endpoints da api para renderizar o json
           api.get('/api/2021/04/21'),
-          api.get('/api/2021/04/20'),
-          api.get('/api/2021/04/19'),
-          api.get('/api/2021/04/18')
+          api.get('/api/2021/04/22'),
+          api.get('/api/2021/04/23'),
+          api.get('/api/2021/04/24'),
+          api.get('/api/2021/04/25'),
+          api.get('/api/2021/04/26')
         ])
 
         setData(apiData)
@@ -50,6 +50,15 @@ function Graficos() {
       
       xAxis: [
         {
+       categories:[
+         "20/04/2020",
+         "21/04/2020",
+         "22/04/2020",
+         "23/04/2020",
+         "24/04/2020",
+         "25/04/2020",
+         "26/04/2020"
+       ],
         title:{
           text:'Dias'
         }
@@ -64,6 +73,7 @@ function Graficos() {
 
       series: [
         {
+          name: 'Cotação',
           data: series
         }
       ]
