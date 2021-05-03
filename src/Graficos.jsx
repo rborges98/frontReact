@@ -3,73 +3,91 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { useEffect } from 'react';
 import api from './service/api';
+import moment from 'moment';
+
+
 
 
 function Graficos() {
   
-  const[data,setData] = useState()  //atribuindo os endpoint a variavel data e quando seu estado muda ele é re-renderizado
-  const[currency,setCurrency] = useState('EUR')
+  const [data, setData] = useState()  
+  const [currency, setCurrency] = useState('EUR')
+  const [hasError, setHasError] = useState(false)
 
-    useEffect(()=>{  //função utilizada para renderizar o componente
-      const getData = async () => {
-        const apiData = await Promise.all([
-          api.get('/api/2021/04/20'),   //pegando os endpoints da api para renderizar o json
-          api.get('/api/2021/04/21'),
-          api.get('/api/2021/04/22'),
-          api.get('/api/2021/04/23'),
-          api.get('/api/2021/04/24'),
-          api.get('/api/2021/04/25'),
-          api.get('/api/2021/04/26')
-        ])
-
+  const now = moment().format("YYYY-MM-DD")
+  const days = [
+    moment(now).subtract(6, "d").format("YYYY-MM-DD"),
+    moment(now).subtract(5, "d").format("YYYY-MM-DD"),
+    moment(now).subtract(4, "d").format("YYYY-MM-DD"),
+    moment(now).subtract(3, "d").format("YYYY-MM-DD"),
+    moment(now).subtract(2, "d").format("YYYY-MM-DD"),
+    moment(now).subtract(1, "d").format("YYYY-MM-DD"),
+    now
+  ]
+  
+  
+  useEffect(() => {  
+    const getData = async () => {
+      try {
+        const apiData = await Promise.all(days.map((day) => api.get('/api/'+day)))
         setData(apiData)
+      } catch (error) {
+        console.log(error)
+        setHasError(true)
       }
 
-      getData()
-    },[])
-  
+    } 
+    getData()
+    // eslint-disable-next-line
+  }, [])
+
   useEffect(() => {
+    console.log(now)
+    console.log(moment(now).subtract(1, "d"))
     console.log(data)
+    // eslint-disable-next-line
   }, [data])
 
   let options //variavel do grafico
   let series = [] //array dos valores a serem colocados no grafico
+  let dataGraph = []
 
-  if (data){
-    for(let i = 0; i <= 6; i++){
+  if (data && !hasError) {
+    for (let i = 0; i <= 6; i++) {
       series.push(data[i].data.rates[currency]) //automatizando os valores p serem inseridos do grafico
+      dataGraph.push(moment(now).subtract(i, "d").format("DD/MM/YYYY"))
     }
     options = {
-    
+
       chart: {
         type: 'spline'
       },
       title: {
-      text: 'Cotação BRL/' + currency
+        text: 'Cotação BRL/' + currency
       },
-      
+
       xAxis: [
         {
-       categories:[
-         "20/04/2020",
-         "21/04/2020",
-         "22/04/2020",
-         "23/04/2020",
-         "24/04/2020",
-         "25/04/2020",
-         "26/04/2020"
-       ],
-        title:{
-          text:'Dias'
-        }
-      }],
+          categories: [
+            dataGraph[6],
+            dataGraph[5],
+            dataGraph[4],
+            dataGraph[3],
+            dataGraph[2],
+            dataGraph[1],
+            moment(now).format("DD/MM/YYYY")
+          ],
+          title: {
+            text: 'Dias'
+          }
+        }],
 
       yAxis: [
         {
-        title:{
-          text:'Valor'
-        }
-      }],
+          title: {
+            text: 'Valor'
+          }
+        }],
 
       series: [
         {
@@ -79,15 +97,15 @@ function Graficos() {
       ]
     };
   }
-  return(
+  return (
     <>
-      
-      <HighchartsReact highcharts={Highcharts} options={options} /> 
-      <button onClick={ () => setCurrency('EUR')}>EUR</button>
-      <button onClick={ () => setCurrency('JPY')}>JPY</button>
-      <button onClick={ () => setCurrency('USD')}>USD</button>
+      {hasError && <div>Houve um erro com a api</div>}
+      <HighchartsReact highcharts={Highcharts} options={options} />
+      <button onClick={() => setCurrency('EUR')}>EUR</button>
+      <button onClick={() => setCurrency('JPY')}>JPY</button>
+      <button onClick={() => setCurrency('USD')}>USD</button>
     </>
-    
+
   );
 }
 
